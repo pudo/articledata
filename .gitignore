@@ -1,0 +1,8 @@
+.DS_Store
+*.egg-info
+*.pyc
+dist/*
+build/*
+.vscode/*
+.mypy_cache/*
+.pytest_cache/*
