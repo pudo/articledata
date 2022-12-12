@@ -1,7 +1,7 @@
 from hashlib import sha1
 from functools import cached_property
-from typing import Any, List, Optional, Set, Tuple
-from urllib.parse import urlencode, urljoin, urlparse, parse_qsl
+from typing import Any, List, Optional, Set, Tuple, Union, Generator, Callable
+from urllib.parse import urlencode, urljoin, urlparse, parse_qsl, ParseResult
 
 
 class URL(object):
@@ -11,16 +11,16 @@ class URL(object):
         self.url = url
 
     @cached_property
-    def parsed(self):
+    def parsed(self) -> ParseResult:
         return urlparse(self.url)
 
     @cached_property
-    def domain(self):
+    def domain(self) -> str:
         domain = self.parsed.hostname or "localhost"
         return domain.strip(".").lower()
 
     @cached_property
-    def scheme(self):
+    def scheme(self) -> str:
         if self.parsed.scheme is None or not len(self.parsed.scheme):
             return "http"
         return self.parsed.scheme.lower().strip()
@@ -51,11 +51,13 @@ class URL(object):
             return None
 
     @classmethod
-    def __get_validators__(cls):
+    def __get_validators__(
+        cls,
+    ) -> Generator[Callable[[Any], Union[str, "URL"]], None, None]:
         yield cls.validate
 
     @classmethod
-    def validate(cls, text: Any):
+    def validate(cls, text: Any) -> Union[str, "URL"]:
         if not isinstance(text, (str, URL)) or text is None:
             raise TypeError("URL is not a string: %r", type(text))
         return text
@@ -72,4 +74,4 @@ class URL(object):
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, URL):
             return other.id == self.id
-        return other == self.url
+        return str(other) == self.url
