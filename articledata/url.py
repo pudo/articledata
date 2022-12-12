@@ -4,9 +4,9 @@ from typing import Any, List, Optional, Set, Tuple
 from urllib.parse import urlencode, urljoin, urlparse, parse_qsl
 
 
-class ArticleURL(object):
+class URL(object):
     def __init__(self, url: str) -> None:
-        if isinstance(url, ArticleURL):
+        if isinstance(url, URL):
             url = url.url
         self.url = url
 
@@ -25,7 +25,7 @@ class ArticleURL(object):
             return "http"
         return self.parsed.scheme.lower().strip()
 
-    def clean(self, query_ignore: Set[str]) -> "ArticleURL":
+    def clean(self, query_ignore: Set[str]) -> "URL":
         parsed = self.parsed._replace(fragment="")
         parsed = parsed._replace(netloc=parsed.netloc.lower())
         cleaned_query: List[Tuple[str, str]] = []
@@ -33,7 +33,7 @@ class ArticleURL(object):
             if key not in query_ignore:
                 cleaned_query.append((key, value))
         parsed = parsed._replace(query=urlencode(cleaned_query))
-        return ArticleURL(parsed.geturl())
+        return URL(parsed.geturl())
 
     @cached_property
     def id(self) -> str:
@@ -44,9 +44,9 @@ class ArticleURL(object):
         norm = parsed.geturl().encode("utf-8")
         return sha1(norm).hexdigest()
 
-    def join(self, text: str) -> Optional["ArticleURL"]:
+    def join(self, text: str) -> Optional["URL"]:
         try:
-            return ArticleURL(urljoin(self.url, text))
+            return URL(urljoin(self.url, text))
         except (TypeError, ValueError):
             return None
 
@@ -56,7 +56,7 @@ class ArticleURL(object):
 
     @classmethod
     def validate(cls, text: Any):
-        if not isinstance(text, (str, ArticleURL)) or text is None:
+        if not isinstance(text, (str, URL)) or text is None:
             raise TypeError("URL is not a string: %r", type(text))
         return text
 
@@ -70,6 +70,6 @@ class ArticleURL(object):
         return hash(self.id)
 
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, ArticleURL):
+        if isinstance(other, URL):
             return other.id == self.id
         return other == self.url
