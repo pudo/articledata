@@ -23,3 +23,6 @@ class Article(BaseModel):
     lede: Optional[str]
     text: str
     extracted_at: str
+
+    class Config:
+        json_encoders = {URL: lambda v: str(v)}
